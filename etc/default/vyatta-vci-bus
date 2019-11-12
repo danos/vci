@@ -1,0 +1,5 @@
+# Defaults for vyatta-vci-bus init script
+# Sourced by /usr/share/dbus/vyatta-vci-bus
+
+# Parameters to pass to vyatta-vci-bus.
+PARAMS=""

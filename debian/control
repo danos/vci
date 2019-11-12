@@ -1,0 +1,46 @@
+Source: vyatta-component-infra
+Section: admin
+Priority: optional
+Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
+Build-Depends:
+ dbus-x11,
+ debhelper (>= 9),
+ dh-golang,
+ dh-systemd,
+ golang-dbus-dev (>= 4.0.0~git20160605-0vyatta4),
+ golang-github-danos-encoding-rfc7951-dev,
+ golang-github-danos-mgmterror-dev,
+ golang-github-go-ini-ini-dev,
+ golang-github-jsouthworth-objtree-dev,
+ golang-go (>= 2:1.4),
+ golang-go-systemd-dev
+Standards-Version: 3.9.8
+
+Package: deb-vci-helper
+Architecture: any
+Built-Using: ${misc:Built-Using}
+Depends: vyatta-vci-bus, ${misc:Depends}, ${shlibs:Depends}
+Description: Helper script for installing Vyatta Components
+ VCI helper for installing Vyatta Components on a Debian System. This utility
+ takes the VCI configuration file and generates the full configuration needed
+ to integrate the component.
+
+Package: golang-github-danos-vci-dev
+Architecture: all
+Depends:
+ golang-dbus-dev (>= 4.0.0~git20160605-0vyatta4),
+ golang-github-danos-encoding-rfc7951-dev,
+ golang-github-danos-mgmterror-dev,
+ golang-github-go-ini-ini-dev,
+ golang-github-jsouthworth-objtree-dev,
+ golang-go-systemd-dev,
+ ${misc:Depends}
+Built-Using: ${misc:Built-Using}
+Description: Vyatta Component Infrastructure Development
+ Development files for integrating with the Vyatta Component Infrastructure
+
+Package: vyatta-vci-bus
+Architecture: all
+Depends: dbus, lsb-base (>= 3.0-6), ${misc:Depends}, ${shlibs:Depends}
+Description: Vyatta Component Infrastructure Private Message Bus
+ Private VCI message bus

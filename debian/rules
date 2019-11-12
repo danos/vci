@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+export DH_GOPKG := github.com/danos/vci
+export DH_GOLANG_INSTALL_ALL := 1
+
+GOCOVER=$(if $(shell go doc cmd/cover >/dev/null 2>&1 && echo true),-cover,)
+
+%:
+	dh $@ --buildsystem=golang --with=systemd,golang
+
+override_dh_auto_build: vet
+	dh_auto_build
+
+override_dh_auto_test:
+	dh_auto_test -- $(GORACE) $(GOCOVER)
+
+override_dh_systemd_enable:
+	dh_systemd_enable --name=vyatta-vci-bus
+
+# We do not vet vendor code
+vet:
+	if go doc cmd/vet >/dev/null 2>&1; then \
+		go tool vet $$(find . -type f -name \*.go | xargs dirname | \
+			sort -u | grep -v "/vendor/"); \
+	fi

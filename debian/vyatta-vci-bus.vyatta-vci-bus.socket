@@ -1,0 +1,8 @@
+[Unit]
+Description=D-Bus VCI Message Bus Socket
+
+[Socket]
+ListenStream=/var/run/vci/vci_bus_socket
+
+[Install]
+WantedBy=sockets.target

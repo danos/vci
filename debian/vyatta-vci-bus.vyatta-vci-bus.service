@@ -1,0 +1,14 @@
+[Unit]
+Description=D-Bus VCI Message Bus
+Documentation=man:dbus-daemon(1)
+Requires=vyatta-vci-bus.socket
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/dbus-daemon --nofork --nopidfile --config-file=/usr/share/dbus-1/vyatta-vci-bus.conf --address=systemd:
+ExecReload=/usr/bin/dbus-send --print-reply --address=unix:path=/var/run/vci/vci_bus_socket --type=method_call --dest=org.freedesktop.DBus / org.freedesktop.DBus.ReloadConfig
+OOMScoreAdjust=-900
+
+[Install]
+WantedBy=multi-user.target
+

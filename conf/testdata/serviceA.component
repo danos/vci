@@ -1,0 +1,9 @@
+[Vyatta Component]
+Name=net.vyatta.test.service.test.a
+Description=Test Component A
+ExecName=/opt/vyatta/sbin/test-service-a
+ConfigFile=/etc/vyatta/test-a.conf
+
+[Model net.vyatta.test.service.test.a.brocade]
+Modules=brocade-service-test-a-v1
+ModelSets=vyatta-v1

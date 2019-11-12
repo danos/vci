@@ -1,0 +1,6 @@
+deb-vci-helper/
+golang-vci-dev/
+*.debhelper.*
+*.substvars
+tmp/
+files
