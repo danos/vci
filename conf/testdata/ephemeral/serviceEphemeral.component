@@ -1,0 +1,9 @@
+[Vyatta Component]
+Name=net.vyatta.test.service.test.ephemeral
+Description=Test Component Ephemeral
+Ephemeral=true
+ConfigFile=/etc/vyatta/test-a.conf
+
+[Model net.vyatta.test.service.test.ephemeral.v1]
+Modules=vyatta-service-test-ephemeral-v1
+ModelSets=vyatta-v1

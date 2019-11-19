@@ -41,6 +41,12 @@ Description: Vyatta Component Infrastructure Development
 
 Package: vyatta-vci-bus
 Architecture: all
-Depends: dbus, lsb-base (>= 3.0-6), ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ dbus,
+ ephemerad,
+ lsb-base (>= 3.0-6),
+ notifyd,
+ ${misc:Depends},
+ ${shlibs:Depends}
 Description: Vyatta Component Infrastructure Private Message Bus
  Private VCI message bus

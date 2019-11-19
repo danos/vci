@@ -9,8 +9,9 @@ package conf
 
 import (
 	"fmt"
-	"github.com/go-ini/ini"
 	"strings"
+
+	"github.com/go-ini/ini"
 )
 
 // 'ini' file merges duplicate sections, taking last value assigned to any
@@ -179,6 +180,13 @@ func parseComponent(section *ini.Section, config *ServiceConfig) error {
 					err.Error())
 			}
 			config.StartOnBoot = startOnBoot
+		case "Ephemeral":
+			ephemeral, err := checkTrueOrFalse(value)
+			if err != nil {
+				return fmt.Errorf("Unable to parse 'Ephemeral': %s\n",
+					err.Error())
+			}
+			config.Ephemeral = ephemeral
 		case "DefaultComponent":
 			isDefaultComp, err := checkTrueOrFalse(value)
 			if err != nil {
@@ -196,7 +204,7 @@ func parseComponent(section *ini.Section, config *ServiceConfig) error {
 	if config.Name == "" {
 		return missingField(section.Name(), "Name")
 	}
-	if config.ExecName == "" {
+	if config.ExecName == "" && !config.Ephemeral {
 		return missingField(section.Name(), "ExecName")
 	}
 	if len(config.ConfigFiles) == 0 {

@@ -9,6 +9,7 @@ package conf
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -114,4 +115,46 @@ func TestSystemdFileStartOnBoot(t *testing.T) {
 	}
 
 	checkSectionKeyEquals(t, iniFile, "Install", "WantedBy", "multi-user.target")
+}
+
+func TestSystemdFileEphemeral(t *testing.T) {
+	compFile := "testdata/ephemeral/serviceEphemeral.component"
+	dotCompFile, err := ioutil.ReadFile(compFile)
+	if err != nil {
+		t.Fatalf("Unable to parse configuration: %s\n", err)
+	}
+	compConfig := getValidConfig(t, dotCompFile)
+	systemdServiceFile := compConfig.GenerateSystemdService()
+	iniFile, err := ini.Load(systemdServiceFile)
+	if err != nil {
+		t.Fatalf("Unable to parse systemd service file: %s", err.Error())
+		return
+	}
+
+	checkSectionKeyEquals(t, iniFile, "Unit", "After",
+		"vyatta-vci-bus.service ephemerad.service")
+	checkSectionKeyEquals(t, iniFile, "Unit", "PartOf", "ephemerad.service")
+	checkSectionKeyEquals(t, iniFile, "Service", "ExecStart",
+		"/lib/vci/ephemera/bin/activate -component "+compConfig.Name)
+	checkSectionKeyEquals(t, iniFile, "Service", "ExecStop",
+		"/lib/vci/ephemera/bin/deactivate -component "+compConfig.Name)
+	checkSectionKeyEquals(t, iniFile, "Service", "RemainAfterExit", "true")
+}
+
+func TestSystemdFileEphemeralStartOnBoot(t *testing.T) {
+	compFile := "testdata/ephemeral/serviceEphemeralOnBoot.component"
+	dotCompFile, err := ioutil.ReadFile(compFile)
+	if err != nil {
+		t.Fatalf("Unable to parse configuration: %s\n", err)
+	}
+	compConfig := getValidConfig(t, dotCompFile)
+	systemdServiceFile := compConfig.GenerateSystemdService()
+	iniFile, err := ini.Load(systemdServiceFile)
+	if err != nil {
+		t.Fatalf("Unable to parse systemd service file: %s", err.Error())
+		return
+	}
+
+	checkSectionKeyEquals(t, iniFile, "Install", "WantedBy",
+		"multi-user.target ephemerad.service")
 }

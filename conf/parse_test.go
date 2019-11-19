@@ -9,9 +9,11 @@ package conf
 
 import (
 	"fmt"
-	"github.com/danos/vci/conf/test_helper"
+	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/danos/vci/conf/test_helper"
 )
 
 var test_config []byte = []byte(`[Vyatta Component]
@@ -285,6 +287,23 @@ func TestParseNoDefaultComponent(t *testing.T) {
 	}
 	if svcCfg.DefaultComp != false {
 		t.Fatalf("DefaultComponent not set to false!")
+		return
+	}
+}
+
+func TestParseEphemeral(t *testing.T) {
+	compFile := "testdata/ephemeral/serviceEphemeral.component"
+	dotCompFile, err := ioutil.ReadFile(compFile)
+	if err != nil {
+		t.Fatalf("Unable to parse configuration: %s\n", err)
+	}
+	svcCfg, err := ParseConfiguration([]byte(dotCompFile))
+	if err != nil {
+		t.Fatalf("Unable to parse configuration: %s\n", err.Error())
+		return
+	}
+	if !svcCfg.Ephemeral {
+		t.Fatalf("Ephemeral not read correctly")
 		return
 	}
 }

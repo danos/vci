@@ -22,6 +22,7 @@ type ServiceConfig struct {
 	Before          []string // This service starts BEFORE services listed here
 	After           []string // This service starts AFTER services listed here
 	StartOnBoot     bool
+	Ephemeral       bool
 	DefaultComp     bool
 	ModelByName     map[string]*Model
 	ModelByModelSet map[string]*Model

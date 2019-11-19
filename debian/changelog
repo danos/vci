@@ -1,3 +1,9 @@
+vyatta-component-infra (4.8) unstable; urgency=medium
+
+  * DANOS Import Master
+
+ -- Vyatta Package Maintainers <DL-vyatta-help@att.com>  Fri, 15 Nov 2019 11:33:45 +0000
+
 vyatta-component-infra (4.6.2) unstable; urgency=medium
 
   * DANOS Import
