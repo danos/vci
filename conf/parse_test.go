@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017-2020, AT&T Intellectual Property. All rights reserved.
 //
 // Copyright (c) 2016-2017 by Brocade Communications Systems, Inc.
 // All rights reserved.
@@ -26,6 +26,7 @@ var test_config []byte = []byte(
 		"[Model net.vyatta.test.example]\n" +
 		"Modules=example-v1,example-interfaces-v1\n" +
 		"ModelSets=vyatta-v1,vyatta-v2\n" +
+		"ImportsRequiredForCheck=foo-v1,bar-v2\n" +
 		"\n" +
 		"[Model org.ietf.test.example]\n" +
 		"Modules=ietf-example\n" +
@@ -309,9 +310,10 @@ func TestParseEphemeral(t *testing.T) {
 }
 
 type expectedBus struct {
-	name      string
-	modules   []string
-	modelsets []string
+	name            string
+	modules         []string
+	modelsets       []string
+	importsForCheck []string
 }
 
 func (expect *expectedBus) match(t *testing.T, c *ServiceConfig) {
@@ -325,6 +327,8 @@ func (expect *expectedBus) match(t *testing.T, c *ServiceConfig) {
 	test_helper.MatchStrings(t, "bus modules", expect.modules, actual.Modules)
 	test_helper.MatchStrings(t, "bus model sets", expect.modelsets,
 		actual.ModelSets)
+	test_helper.MatchStrings(t, "bus imports for check", expect.importsForCheck,
+		actual.ImportsForCheck)
 
 	for _, m := range expect.modelsets {
 		bus := c.ModelByModelSet[m]
@@ -350,6 +354,7 @@ func TestParseModels(t *testing.T) {
 		"net.vyatta.test.example",
 		[]string{"example-v1", "example-interfaces-v1"},
 		[]string{"vyatta-v1", "vyatta-v2"},
+		[]string{"foo-v1", "bar-v2"},
 	}
 	expectBus1.match(t, config)
 
@@ -357,6 +362,7 @@ func TestParseModels(t *testing.T) {
 		"org.ietf.test.example",
 		[]string{"ietf-example"},
 		[]string{"ietf-v1"},
+		[]string{},
 	}
 	expectBus2.match(t, config)
 }

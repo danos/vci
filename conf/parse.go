@@ -63,6 +63,7 @@ func ParseConfiguration(input []byte) (*ServiceConfig, error) {
 			   [Model net.vyatta.test.example]
 			   Modules=example-v1,example-interfaces-v1
 			   ModelSet=vyatta-v1,vyatta-v2
+			   ImportsRequiredForCheck=foo-v1,bar-v2
 
 			   [Model org.ietf.test.example]
 			   Modules=ietf-example
@@ -73,6 +74,8 @@ func ParseConfiguration(input []byte) (*ServiceConfig, error) {
 				ExecName:  config.ExecName,
 				Modules:   section.Key("Modules").Strings(","),
 				ModelSets: section.Key("ModelSets").Strings(","),
+				ImportsForCheck: section.Key(
+					"ImportsRequiredForCheck").Strings(","),
 			}
 			config.ModelByName[model.Name] = model
 			for _, m := range model.ModelSets {

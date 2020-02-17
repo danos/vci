@@ -8,10 +8,11 @@
 package conf
 
 type Model struct {
-	Name      string
-	ExecName  string
-	ModelSets []string
-	Modules   []string
+	Name            string
+	ExecName        string
+	ModelSets       []string
+	Modules         []string
+	ImportsForCheck []string
 }
 
 type ServiceConfig struct {

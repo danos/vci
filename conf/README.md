@@ -22,6 +22,7 @@ An example component file is shown:
   [Model net.vyatta.vci.config.exampled.v1]
   Modules=example-main-v1,example-extra-v1
   ModelSets=vyatta-v1,other-v1
+  ImportsRequiredForCheck=foo-v1,bar-v2
 
   [Model net.vyatta.vci.config.exampled.v2]
   Modules=example-main-v1,example-extra-v2,example-new-v1
@@ -99,4 +100,10 @@ Comma-separated list of YANG modules provided by this model.
 ### ModelSets
 
 Comma-separated list of model sets supported by this model.
+
+### ImportsRequiredForCheck
+
+Optional field used when a component needs candidate configuration from other
+components to be able to carry out the check() function.  Content is a comma-
+separated list of YANG modules required.
 
