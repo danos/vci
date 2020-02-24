@@ -16,9 +16,10 @@ import (
 )
 
 type testModel struct {
-	name      string
-	modules   []string
-	modelSets []string
+	name             string
+	modules          []string
+	modelSets        []string
+	checkOnlyImports []string
 }
 
 type TestComp struct {
@@ -106,6 +107,22 @@ func (tc *TestComp) AddModel(
 	return tc
 }
 
+func (tc *TestComp) AddModelWithCheckImport(
+	name string,
+	modules []string,
+	modelSets []string,
+	checkOnlyImports []string,
+) *TestComp {
+	var tm = testModel{
+		name:             name,
+		modules:          modules,
+		modelSets:        modelSets,
+		checkOnlyImports: checkOnlyImports,
+	}
+	tc.models = append(tc.models, tm)
+	return tc
+}
+
 func (tc *TestComp) ServiceName() string {
 	return tc.prefix + "." + tc.name
 }
@@ -143,6 +160,10 @@ func (tc *TestComp) String() string {
 			model.name, strings.Join(model.modules, ","),
 			strings.Join(model.modelSets, ","))
 		componentStr += modelStr
+		if len(model.checkOnlyImports) > 0 {
+			componentStr += fmt.Sprintf("ImportsRequiredForCheck=%s\n",
+				strings.Join(model.checkOnlyImports, ","))
+		}
 	}
 
 	return componentStr
