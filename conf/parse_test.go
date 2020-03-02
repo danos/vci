@@ -16,20 +16,20 @@ import (
 	"github.com/danos/vci/conf/test_helper"
 )
 
-var test_config []byte = []byte(`[Vyatta Component]
-Name=net.vyatta.test.example
-Description=Super Example Project
-ExecName=/opt/vyatta/sbin/example-service
-ConfigFile=/etc/vyatta/example.conf
-
-[Model net.vyatta.test.example]
-Modules=example-v1,example-interfaces-v1
-ModelSets=vyatta-v1,vyatta-v2
-
-[Model org.ietf.test.example]
-Modules=ietf-example
-ModelSets=ietf-v1
-`)
+var test_config []byte = []byte(
+	"[Vyatta Component]\n" +
+		"Name=net.vyatta.test.example\n" +
+		"Description=Super Example Project\n" +
+		"ExecName=/opt/vyatta/sbin/example-service\n" +
+		"ConfigFile=/etc/vyatta/example.conf\n" +
+		"\n" +
+		"[Model net.vyatta.test.example]\n" +
+		"Modules=example-v1,example-interfaces-v1\n" +
+		"ModelSets=vyatta-v1,vyatta-v2\n" +
+		"\n" +
+		"[Model org.ietf.test.example]\n" +
+		"Modules=ietf-example\n" +
+		"ModelSets=ietf-v1\n")
 
 func compareCSVs(t *testing.T, desc string, actual, expected []string) {
 	if len(actual) != len(expected) {
@@ -97,19 +97,19 @@ func TestMissingField(t *testing.T) {
 }
 
 // 2 models, same name, same component
-const testComp_twoModelsSameName = `[Vyatta Component]
-Name=net.vyatta.test.service.test
-Description=Test Component
-ExecName=/opt/vyatta/sbin/test-service
-ConfigFile=/etc/vyatta/test.conf
-
-[Model net.vyatta.test.service.test.a]
-Modules=vyatta-service-test-a-v1
-ModelSets=vyatta-v1
-
-[Model net.vyatta.test.service.test.a]
-Modules=vyatta-service-test-b-v1
-ModelSets=open-v1`
+const testComp_twoModelsSameName = "[Vyatta Component]\n" +
+	"Name=net.vyatta.test.service.test\n" +
+	"Description=Test Component\n" +
+	"ExecName=/opt/vyatta/sbin/test-service\n" +
+	"ConfigFile=/etc/vyatta/test.conf\n" +
+	"\n" +
+	"[Model net.vyatta.test.service.test.a]\n" +
+	"Modules=vyatta-service-test-a-v1\n" +
+	"ModelSets=vyatta-v1\n" +
+	"\n" +
+	"[Model net.vyatta.test.service.test.a]\n" +
+	"Modules=vyatta-service-test-b-v1\n" +
+	"ModelSets=open-v1\n"
 
 func TestDuplicateSection(t *testing.T) {
 	_, err := ParseConfiguration([]byte(testComp_twoModelsSameName))
@@ -143,17 +143,17 @@ func TestComponentNameIncludesDotService(t *testing.T) {
 }
 
 // Badly formatted but salvageable 'Before' and 'After' statements.
-const testComp_salvageableDeps = `[Vyatta Component]
-Name=net.vyatta.test.service.test
-Description=Test Component
-ExecName=/opt/vyatta/sbin/test-service
-ConfigFile=/etc/vyatta/test.conf
-Before=Components.service, With,Trailing.service , Comma,
-After= MoreComponents, TrailingSpace.service, 
-
-[Model net.vyatta.test.service.test.a]
-Modules=vyatta-service-test-b-v1
-ModelSets=open-v1`
+const testComp_salvageableDeps = "[Vyatta Component]\n" +
+	"Name=net.vyatta.test.service.test\n" +
+	"Description=Test Component\n" +
+	"ExecName=/opt/vyatta/sbin/test-service\n" +
+	"ConfigFile=/etc/vyatta/test.conf\n" +
+	"Before=Components.service, With,Trailing.service , Comma,\n" +
+	"After= MoreComponents, TrailingSpace.service, \n" +
+	"\n" +
+	"[Model net.vyatta.test.service.test.a]\n" +
+	"Modules=vyatta-service-test-b-v1\n" +
+	"ModelSets=open-v1\n"
 
 func TestSalvageableDeps(t *testing.T) {
 	ms, err := ParseConfiguration([]byte(testComp_salvageableDeps))
@@ -178,16 +178,16 @@ func TestSalvageableDeps(t *testing.T) {
 	compareCSVs(t, "Salvageable After stmt", after, expAfter)
 }
 
-const testComp_unsalvageableDeps = `[Vyatta Component]
-Name=net.vyatta.test.service.test
-Description=Test Component
-ExecName=/opt/vyatta/sbin/test-service
-ConfigFile=/etc/vyatta/test.conf
-Before=Component With Spaces
-
-[Model net.vyatta.test.service.test.a]
-Modules=vyatta-service-test-b-v1
-ModelSets=open-v1`
+const testComp_unsalvageableDeps = "[Vyatta Component]\n" +
+	"Name=net.vyatta.test.service.test\n" +
+	"Description=Test Component\n" +
+	"ExecName=/opt/vyatta/sbin/test-service\n" +
+	"ConfigFile=/etc/vyatta/test.conf\n" +
+	"Before=Component With Spaces\n" +
+	"\n" +
+	"[Model net.vyatta.test.service.test.a]\n" +
+	"Modules=vyatta-service-test-b-v1\n" +
+	"ModelSets=open-v1\n"
 
 func TestUnsalvageableDeps(t *testing.T) {
 	_, err := ParseConfiguration([]byte(testComp_unsalvageableDeps))
@@ -203,15 +203,15 @@ func TestUnsalvageableDeps(t *testing.T) {
 }
 
 // Badly formatted but salvageable ConfigFile statement.
-const testComp_salvageableCfgFiles = `[Vyatta Component]
-Name=net.vyatta.test.service.test
-Description=Test Component
-ExecName=/opt/vyatta/sbin/test-service
-ConfigFile=first.file, secondWithSpaceBeforeAndAfter ,thirdTrailing.WS 
-
-[Model net.vyatta.test.service.test.a]
-Modules=vyatta-service-test-b-v1
-ModelSets=open-v1`
+const testComp_salvageableCfgFiles = "[Vyatta Component]\n" +
+	"Name=net.vyatta.test.service.test\n" +
+	"Description=Test Component\n" +
+	"ExecName=/opt/vyatta/sbin/test-service\n" +
+	"ConfigFile=first.file, secondWithSpaceBeforeAndAfter ,thirdTrailing.WS \n" +
+	"\n" +
+	"[Model net.vyatta.test.service.test.a]\n" +
+	"Modules=vyatta-service-test-b-v1\n" +
+	"ModelSets=open-v1\n"
 
 func TestSalvageableCfgFiles(t *testing.T) {
 	ms, err := ParseConfiguration([]byte(testComp_salvageableCfgFiles))
