@@ -1,3 +1,12 @@
+vyatta-component-infra (4.9) unstable; urgency=medium
+
+  * Ensure trailing WS in test file is preserved
+  * Add support to testcomp_gen.go for checkNS
+  * Parse ImportsRequiredForCheck field in dotComponent file
+  * Fix copyrights
+
+ -- William Ivory <william.ivory@intl.att.com>  Fri, 03 Apr 2020 11:45:44 +0100
+
 vyatta-component-infra (4.8) unstable; urgency=medium
 
   * DANOS Import Master
