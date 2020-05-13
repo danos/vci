@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2018-2020, AT&T Intellectual Property. All rights reserved.
 //
 // SPDX-License-Identifier: MPL-2.0
 //
@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"syscall"
 
 	systemd "github.com/coreos/go-systemd/dbus"
 )
@@ -223,4 +224,15 @@ func (mgr *Manager) IsActive(name string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func (mgr *Manager) Kill(name string, signal syscall.Signal) error {
+	if err := mgr.connect(); err != nil {
+		return err
+	}
+	if !mgr.isAvailable() {
+		return nil
+	}
+	mgr.conn.KillUnit(name, int32(signal))
+	return nil
 }
