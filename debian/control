@@ -50,3 +50,12 @@ Depends:
  ${shlibs:Depends}
 Description: Vyatta Component Infrastructure Private Message Bus
  Private VCI message bus
+
+Package: vci-tools
+Architecture: any
+Depends:
+ vyatta-vci-bus,
+ ${shlibs:Depends},
+Built-Using: ${misc:Built-Using}
+Description: Vyatta Component Infrastructure Tools
+ Command line tools for interacting with the VCI bus
