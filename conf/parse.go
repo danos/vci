@@ -210,9 +210,6 @@ func parseComponent(section *ini.Section, config *ServiceConfig) error {
 	if config.ExecName == "" && !config.Ephemeral {
 		return missingField(section.Name(), "ExecName")
 	}
-	if len(config.ConfigFiles) == 0 {
-		return missingField(section.Name(), "ConfigFile")
-	}
 
 	return nil
 }

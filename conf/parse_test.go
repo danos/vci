@@ -71,7 +71,7 @@ func TestReadInputSuccess(t *testing.T) {
 
 func TestMissingField(t *testing.T) {
 	mandatoryFields := []string{
-		"Description", "Name", "ExecName", "ConfigFile",
+		"Description", "Name", "ExecName",
 	}
 
 	for _, missing := range mandatoryFields {
