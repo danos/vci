@@ -49,6 +49,17 @@ func (run *testRunningConfig) Set(config *testConfig) error {
 	return nil
 }
 
+type testRunningConfigNoGet struct {
+}
+
+func (run *testRunningConfigNoGet) Check(config *testConfig) error {
+	return nil
+}
+
+func (run *testRunningConfigNoGet) Set(config *testConfig) error {
+	return nil
+}
+
 func TestTransportObjectRunningConfigNilWrap(t *testing.T) {
 	cfg := newConfig(nil, newClient())
 	if cfg.IsValid() {
@@ -102,6 +113,18 @@ func TestTransportObjectRunningConfigGetValid(t *testing.T) {
 	}
 	if getType.NumOut() != 2 {
 		t.Errorf("Get must have two and only two return values")
+	}
+}
+
+func TestTransportObjectRunningConfigNoGet(t *testing.T) {
+	config := newConfig(&testRunningConfigNoGet{}, newClient())
+	if !config.IsValid() {
+		t.Error(config)
+		return
+	}
+	_, ok := config.Methods()["get"]
+	if ok {
+		t.Fatal("Found unexpected get method")
 	}
 }
 

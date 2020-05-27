@@ -126,7 +126,12 @@ func (o *config) generateMethods(object interface{}) {
 func (o *config) generateGetMethod(object interface{}) error {
 	const name = "Get"
 	var method reflect.Value
-	err := o.setMethod(&method, reflect.ValueOf(object), name,
+	objectVal := reflect.ValueOf(object)
+	methodFunc := objectVal.MethodByName(name)
+	if !methodFunc.IsValid() {
+		return nil
+	}
+	err := o.setMethod(&method, objectVal, name,
 		o.validateGet)
 	if err != nil {
 		return err
