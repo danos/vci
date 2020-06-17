@@ -236,3 +236,14 @@ func (mgr *Manager) Kill(name string, signal syscall.Signal) error {
 	mgr.conn.KillUnit(name, int32(signal))
 	return nil
 }
+
+func (mgr *Manager) ResetFailedUnit(name string) error {
+	if err := mgr.connect(); err != nil {
+		return err
+	}
+	if !mgr.isAvailable() {
+		return nil
+	}
+	mgr.conn.ResetFailedUnit(name)
+	return nil
+}
