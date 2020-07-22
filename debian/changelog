@@ -1,3 +1,26 @@
+vyatta-component-infra (4.10) unstable; urgency=medium
+
+  [ Daniel Gollub ]
+  * Introduce Kill() method for services manager
+
+  [ John Southworth ]
+  * Create shell helper to emit notifications
+
+  [ Daniel Gollub ]
+  * go.mod: pin to a Debian 10 compatible go-systemd revision
+
+  [ John Southworth ]
+  * Config files should be optional in .component files
+  * Don't require Config/Get method
+
+  [ Daniel Gollub ]
+  * Introduce ResetFailedUnit for service managers
+
+  [ John Southworth ]
+  * Increase bus limits
+
+ -- William Ivory <william.ivory@intl.att.com>  Wed, 22 Jul 2020 11:46:19 +0100
+
 vyatta-component-infra (4.9) unstable; urgency=medium
 
   * Ensure trailing WS in test file is preserved
