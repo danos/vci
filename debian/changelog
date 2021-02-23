@@ -1,3 +1,10 @@
+vyatta-component-infra (4.11) unstable; urgency=medium
+
+  [ Daniel Gollub ]
+  * go.mod: update go-systemd pinning for Go 1.14
+
+ -- William Ivory <william.ivory@intl.att.com>  Tue, 23 Feb 2021 13:51:26 +0000
+
 vyatta-component-infra (4.10) unstable; urgency=medium
 
   [ Daniel Gollub ]
