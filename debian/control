@@ -4,9 +4,8 @@ Priority: optional
 Maintainer: Vyatta Package Maintainers <DL-vyatta-help@att.com>
 Build-Depends:
  dbus-x11,
- debhelper (>= 9),
+ debhelper (>= 9.20160709),
  dh-golang,
- dh-systemd,
  golang-dbus-dev (>= 4.0.0~git20160605-0vyatta4),
  golang-github-danos-encoding-rfc7951-dev,
  golang-github-danos-mgmterror-dev,
