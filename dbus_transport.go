@@ -1,4 +1,5 @@
-// Copyright (c) 2017-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017-2019, 2021, AT&T Intellectual Property.
+// All rights reserved.
 //
 // Copyright (c) 2016 by Brocade Communications Systems, Inc.
 // All rights reserved.
@@ -10,14 +11,15 @@ package vci
 import (
 	"bytes"
 	"errors"
+	"strings"
+	"sync"
+	"unicode"
+
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/danos/mgmterror"
 	"github.com/godbus/dbus"
 	"github.com/godbus/dbus/introspect"
 	"github.com/jsouthworth/objtree"
-	"strings"
-	"sync"
-	"unicode"
 )
 
 const (
@@ -242,6 +244,28 @@ func (t *dbusTransport) Emit(
 	return t.conn.Emit(modulePath, notificationName, encodedData)
 }
 
+func (t *dbusTransport) SetConfigForModel(
+	modelName string, encodedData string,
+) error {
+	obj := t.conn.Object(modelName, "/running")
+	err := obj.Call(writeDBusInterface+".Set", 0, encodedData).Store()
+	if err != nil {
+		err = t.processErrorIgnoreUnsupported(err)
+	}
+	return err
+}
+
+func (t *dbusTransport) CheckConfigForModel(
+	modelName string, encodedData string,
+) error {
+	obj := t.conn.Object(modelName, "/running")
+	err := obj.Call(writeDBusInterface+".Check", 0, encodedData).Store()
+	if err != nil {
+		err = t.processErrorIgnoreUnsupported(err)
+	}
+	return err
+}
+
 func (t *dbusTransport) StoreConfigByModelInto(
 	modelName string, encodedData *string,
 ) error {
@@ -407,11 +431,26 @@ func (t *dbusTransport) genYangdRPCMethodName(rpcName string) string {
 		"." + t.convertYangNameToDBus(rpcName)
 }
 
+func (t *dbusTransport) processErrorIgnoreUnsupported(err error) error {
+	return t.processErrorInternal(err, true)
+}
+
 func (t *dbusTransport) processError(err error) error {
+	return t.processErrorInternal(err, false)
+}
+
+func (t *dbusTransport) processErrorInternal(
+	err error,
+	ignoreUnsupported bool,
+) error {
 	if dbuserr, ok := err.(dbus.Error); ok {
-		// Convert NoSuchObject errors to a non-DBUS-specific type so callers
-		// can process this generically.
+		// Convert NoSuchObject errors to a non-DBUS-specific type. Callers
+		// can specify if they wish to completely ignore this error, eg for an
+		// optional method on the bus.
 		if dbuserr.Name == "org.freedesktop.DBus.Error.NoSuchObject" {
+			if ignoreUnsupported {
+				return nil
+			}
 			return mgmterror.NewOperationNotSupportedApplicationError()
 		}
 		rpcerr := getRpcError(dbuserr.Name, dbuserr.Body)

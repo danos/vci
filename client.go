@@ -1,4 +1,5 @@
-// Copyright (c) 2017-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017-2019, 2021, AT&T Intellectual Property.
+// All rights reserved.
 // All rights reserved.
 //
 // SPDX-License-Identifier: MPL-2.0
@@ -139,6 +140,34 @@ func (c *Client) Emit(
 		return err
 	}
 	return c.transport.Emit(moduleName, notificationName, encodedData)
+}
+
+// SetConfigForModel will set the configuration for the given model, using
+// the model's component's registered Set method, marshallling the config
+// from the provided object using the RFC7951 encoder.
+func (c *Client) SetConfigForModel(
+	modelName string,
+	object interface{},
+) error {
+	encodedData, err := c.marshalObject(object)
+	if err != nil {
+		return err
+	}
+	return c.transport.SetConfigForModel(modelName, encodedData)
+}
+
+// CheckConfigForModel will validate the configuration for the given model,
+// using the model's component's registered Check method, marshalling the
+// config from the provided object using the RFC7951 encoder.
+func (c *Client) CheckConfigForModel(
+	modelName string,
+	object interface{},
+) error {
+	encodedData, err := c.marshalObject(object)
+	if err != nil {
+		return err
+	}
+	return c.transport.CheckConfigForModel(modelName, encodedData)
 }
 
 // StoreConfigByModelInto will retrieve the configuration

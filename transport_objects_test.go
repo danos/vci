@@ -1,4 +1,5 @@
-// Copyright (c) 2017,2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017,2019, 2021, AT&T Intellectual Property.
+// All rights reserved.
 // Copyright (c) 2016 by Brocade Communications Systems, Inc.
 // All rights reserved.
 //
@@ -57,6 +58,25 @@ func (run *testRunningConfigNoGet) Check(config *testConfig) error {
 }
 
 func (run *testRunningConfigNoGet) Set(config *testConfig) error {
+	return nil
+}
+
+type testValidateOrCommitConfig struct {
+	setCfg testConfig
+	valCfg testConfig
+}
+
+func (tvocc *testValidateOrCommitConfig) Get() *testConfig {
+	return &tvocc.setCfg
+}
+
+func (tvocc *testValidateOrCommitConfig) Check(config *testConfig) error {
+	tvocc.valCfg = *config
+	return nil
+}
+
+func (tvocc *testValidateOrCommitConfig) Set(config *testConfig) error {
+	tvocc.setCfg = *config
 	return nil
 }
 

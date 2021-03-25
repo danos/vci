@@ -1,4 +1,4 @@
-// Copyright (c) 2017,2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017,2019,2021, AT&T Intellectual Property.
 // All rights reserved.
 //
 // SPDX-License-Identifier: MPL-2.0
@@ -202,6 +202,112 @@ func TestClientSubscribe(t *testing.T) {
 		}
 	})
 
+}
+
+func TestClientSetConfigForModel(t *testing.T) {
+	t.Run("valid", func(t *testing.T) {
+		tvocc := &testValidateOrCommitConfig{}
+		resetTestBus()
+		comp := NewComponent("com.vyatta.test.foo")
+		comp.Model("com.vyatta.test.foo.v1").
+			Config(tvocc)
+		err := comp.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		client, err := Dial()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = client.SetConfigForModel("com.vyatta.test.foo.v1",
+			testConfig{Value: "config to set"})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if tvocc.setCfg.Value != "config to set" {
+			t.Fatalf("unexpected config returned: %s", tvocc.setCfg.Value)
+		}
+		if tvocc.valCfg.Value != "" {
+			t.Fatalf("Validate config unexpectedly set.")
+		}
+	})
+	t.Run("invalid-return", func(t *testing.T) {
+		resetTestBus()
+		comp := NewComponent("com.vyatta.test.foo")
+		comp.Model("com.vyatta.test.foo.v1").
+			Config(&testValidateOrCommitConfig{})
+		err := comp.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+		tBus.toggleDialFailure()
+		defer tBus.toggleDialFailure()
+
+		client, _ := Dial()
+
+		var out map[string]interface{}
+		err = client.CheckConfigForModel("com.vyatta.test.foo.v1",
+			&out)
+		if err == nil {
+			t.Fatal("should have failed, not connected")
+		}
+	})
+}
+
+func TestClientCheckConfigForModel(t *testing.T) {
+	t.Run("valid", func(t *testing.T) {
+		tvocc := &testValidateOrCommitConfig{}
+		resetTestBus()
+		comp := NewComponent("com.vyatta.test.foo")
+		comp.Model("com.vyatta.test.foo.v1").
+			Config(tvocc)
+		err := comp.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		client, err := Dial()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = client.CheckConfigForModel("com.vyatta.test.foo.v1",
+			testConfig{Value: "config to validate"})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if tvocc.valCfg.Value != "config to validate" {
+			t.Fatalf("unexpected config returned: %s", tvocc.valCfg.Value)
+		}
+		if tvocc.setCfg.Value != "" {
+			t.Fatalf("Config committed unexpectedly.")
+		}
+	})
+	t.Run("invalid-return", func(t *testing.T) {
+		resetTestBus()
+		comp := NewComponent("com.vyatta.test.foo")
+		comp.Model("com.vyatta.test.foo.v1").
+			Config(&testValidateOrCommitConfig{})
+		err := comp.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+		tBus.toggleDialFailure()
+		defer tBus.toggleDialFailure()
+
+		client, _ := Dial()
+
+		var out map[string]interface{}
+		err = client.CheckConfigForModel("com.vyatta.test.foo.v1",
+			&out)
+		if err == nil {
+			t.Fatal("should have failed, not connected")
+		}
+	})
 }
 
 func TestClientStoreConfigByModelInto(t *testing.T) {

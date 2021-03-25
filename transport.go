@@ -1,4 +1,5 @@
-// Copyright (c) 2017-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017-2019,2021, AT&T Intellectual Property.
+// All rights reserved.
 //
 // Copyright (c) 2016 by Brocade Communications Systems, Inc.
 // All rights reserved
@@ -75,6 +76,10 @@ type transporter interface {
 	// must be received by all subscribers, including subscribers on the
 	// current connection.
 	Emit(moduleName, notificationName, encodedData string) error
+	// CheckConfigForModel will check the given config with the component
+	CheckConfigForModel(modelName string, encodedData string) error
+	// SetConfigForModel will write the given configuration to the component.
+	SetConfigForModel(modelName string, encodedData string) error
 	// StoreConfigByModelInto will cause the configuration for a given
 	// model to be queried and stored into the passed in pointer.
 	StoreConfigByModelInto(modelName string, encodedData *string) error

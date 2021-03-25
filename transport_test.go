@@ -1,4 +1,5 @@
-// Copyright (c) 2017,2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017,2019, 2021, AT&T Intellectual Property.
+// All rights reserved.
 //
 // SPDX-License-Identifier: MPL-2.0
 //
@@ -7,13 +8,13 @@ package vci
 
 import (
 	"errors"
-	"github.com/danos/vci/internal/queue"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/danos/mgmterror"
+	"github.com/danos/vci/internal/queue"
 )
 
 var tBus *testBus
@@ -337,7 +338,7 @@ func (o *testObject) Call(name string, encodedData string) (*testRPCPromise, err
 			}, nil
 		}
 		return &testRPCPromise{
-			out: outVals[0].Interface().(string),
+			out: "",
 		}, nil
 	case 2:
 		if outVals[1].Interface() != nil {
@@ -428,6 +429,24 @@ func (t *testTransport) Unsubscribe(
 func (t *testTransport) Emit(moduleName, notificationName, encodedData string) error {
 	name := moduleName + "/" + notificationName
 	return t.conn.Emit(name, encodedData)
+}
+func (t *testTransport) SetConfigForModel(
+	modelName string, encodedData string) error {
+	obj, err := t.conn.Object(modelName, "running")
+	if err != nil {
+		return err
+	}
+	_, err = obj.Call("set", encodedData)
+	return err
+}
+func (t *testTransport) CheckConfigForModel(
+	modelName string, encodedData string) error {
+	obj, err := t.conn.Object(modelName, "running")
+	if err != nil {
+		return err
+	}
+	_, err = obj.Call("check", encodedData)
+	return err
 }
 func (t *testTransport) StoreConfigByModelInto(modelName string, encodedData *string) error {
 	obj, err := t.conn.Object(modelName, "running")
