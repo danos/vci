@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2018-2021, AT&T Intellectual Property. All rights reserved.
 //
 // SPDX-License-Identifier: MPL-2.0
 //
@@ -76,10 +76,12 @@ func (mgr *Manager) connect() error {
 	return nil
 }
 
-// Close - should be called when finished with a Manager object
+// Close - should be called when finished running a Manager object call.
+// 'conn' is reset so Manager object may be reused.
 func (mgr *Manager) Close() {
 	if mgr.conn != nil {
 		mgr.conn.Close()
+		mgr.conn = nil
 	}
 }
 
