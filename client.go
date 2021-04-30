@@ -74,11 +74,27 @@ func (c *Client) Close() error {
 // a promise that can be fulfilled when the result is
 // needed. The input object is marshalled using the RFC7951 encoder.
 func (c *Client) Call(moduleName, rpcName string, input interface{}) *RPCCall {
+	return c.CallWithMetadata(moduleName, rpcName, RPCMetadata{}, input)
+}
+
+// CallWithMetadata will initiate a call to an RPC specified by the YANG module
+// name and the RPC name. This will return a promise that can be
+// fulfilled when the result is needed. Additonal meta data may be
+// provided via the RPCMetaData object. The input object is marshalled
+// using the RFC7951 encoder.
+func (c *Client) CallWithMetadata(
+	moduleName, rpcName string, metadata RPCMetadata, input interface{},
+) *RPCCall {
+	encodedMetadata, err := c.marshalObject(metadata)
+	if err != nil {
+		return &RPCCall{err: err}
+	}
 	encodedData, err := c.marshalObject(input)
 	if err != nil {
 		return &RPCCall{err: err}
 	}
-	promise, err := c.transport.Call(moduleName, rpcName, encodedData)
+	promise, err := c.transport.Call(
+		moduleName, rpcName, encodedMetadata, encodedData)
 	if err != nil {
 		return &RPCCall{err: err}
 	}
@@ -245,4 +261,15 @@ func (c *RPCCall) StoreOutputInto(object interface{}) error {
 		return err
 	}
 	return c.client.unmarshalObject(encodedData, object)
+}
+
+// RPCMetaData provides additional context to the recipient of an RPC call.
+// Since the VCI client library is to be used only from trusted sources
+// to make calls we can provide components with some additional trusted context
+// such as the user making the call.
+type RPCMetadata struct {
+	Pid    int32
+	Uid    uint32
+	User   string
+	Groups []string
 }

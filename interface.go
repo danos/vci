@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019, AT&T Intellectual Property. All rights reserved.
+// Copyright (c) 2017-2021, AT&T Intellectual Property. All rights reserved.
 // Copyright (c) 2016 by Brocade Communications Systems, Inc.
 // All rights reserved.
 //
@@ -85,6 +85,13 @@ type Model interface {
 	//       in the map.
 	//   (2) An object with only methods of the following form:
 	//       Name(input T1) (output T2, error)
+	//       Names will be converted from the Go style CamelCase
+	//       to the standard YANG convention of camel-case.
+	//   (3) A map from string to func(meta RPCMetadata, input T1) (output T2, error).
+	//       In this form all methods are exposed with the names provided
+	//       in the map.
+	//   (4) An object with only methods of the following form:
+	//       Name(meta RPCMetadata, input T1) (output T2, error)
 	//       Names will be converted from the Go style CamelCase
 	//       to the standard YANG convention of camel-case.
 	// where T1, T2 are any types that can be marshalled by the

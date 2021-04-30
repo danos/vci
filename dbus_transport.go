@@ -176,6 +176,7 @@ func (t *dbusTransport) RequestIdentity(id string) error {
 
 func (t *dbusTransport) Call(
 	moduleName, rpcName string,
+	metaData string,
 	encodedData string,
 ) (transportRPCPromise, error) {
 	modelName, err := t.getDestinationByModuleName(moduleName)
@@ -193,7 +194,7 @@ func (t *dbusTransport) Call(
 
 	obj := t.conn.Object(modelName, t.getModuleRPCObjectPath(moduleName))
 	call := obj.Go(t.getModuleRPCInterfaceName(moduleName)+
-		"."+dbusRPCName, 0, nil, encodedData)
+		"."+dbusRPCName, 0, nil, metaData, encodedData)
 	return &dbusCall{call: call, transport: t}, nil
 }
 
@@ -463,7 +464,7 @@ func (t *dbusTransport) processErrorInternal(
 func (t *dbusTransport) callYangdRPC(name, input string) (string, error) {
 	var output string
 	obj := t.conn.Object(yangdName, yangdRPCPath)
-	err := obj.Call(t.genYangdRPCMethodName(name), 0, input).Store(&output)
+	err := obj.Call(t.genYangdRPCMethodName(name), 0, "{}", input).Store(&output)
 	if err != nil {
 		err = t.processError(err)
 	}

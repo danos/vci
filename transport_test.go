@@ -25,6 +25,8 @@ const (
 	testYangServiceModule = "yangd-v1"
 )
 
+const emptyMetadata = "{}"
+
 func initTestBus() {
 	tBus = newTestBus()
 	setDefaultTransportConstructor(func() transporter {
@@ -231,6 +233,7 @@ func (c *testConn) RequestIdentity(id string) error {
 			return err
 		}
 		call, err := obj.Call("register-module",
+			emptyMetadata,
 			"{\"name\":\""+name+"\","+
 				"\"destination\":\""+c.id+"\"}")
 		if err != nil {
@@ -310,7 +313,7 @@ func (o *testObject) Type() string {
 	return o.typ
 }
 
-func (o *testObject) Call(name string, encodedData string) (*testRPCPromise, error) {
+func (o *testObject) Call(name string, meta, encodedData string) (*testRPCPromise, error) {
 	//good enough to test our APIs but not completely generic.
 	if o == nil {
 		return nil, errors.New("Unknown object")
@@ -320,12 +323,16 @@ func (o *testObject) Call(name string, encodedData string) (*testRPCPromise, err
 		return nil, errors.New("Unknown method")
 	}
 	mVal := reflect.ValueOf(method)
+	metaVal := reflect.ValueOf(meta)
 	inVal := reflect.ValueOf(encodedData)
 	var outVals []reflect.Value
-	if mVal.Type().NumIn() == 0 {
+	switch mVal.Type().NumIn() {
+	case 0:
 		outVals = mVal.Call([]reflect.Value{})
-	} else {
+	case 1:
 		outVals = mVal.Call([]reflect.Value{inVal})
+	case 2:
+		outVals = mVal.Call([]reflect.Value{metaVal, inVal})
 	}
 
 	switch mVal.Type().NumOut() {
@@ -399,7 +406,7 @@ func (t *testTransport) RequestIdentity(id string) error {
 	return t.conn.RequestIdentity(id)
 }
 
-func (t *testTransport) Call(moduleName, rpcName, input string) (transportRPCPromise, error) {
+func (t *testTransport) Call(moduleName, rpcName, meta, input string) (transportRPCPromise, error) {
 	modelName, err := t.getDestinationByModuleName(moduleName)
 	if err != nil {
 		return nil, err
@@ -408,7 +415,7 @@ func (t *testTransport) Call(moduleName, rpcName, input string) (transportRPCPro
 	if err != nil {
 		return nil, err
 	}
-	return obj.Call(rpcName, input)
+	return obj.Call(rpcName, meta, input)
 }
 func (t *testTransport) Subscribe(
 	moduleName, notificationName string,
@@ -436,7 +443,7 @@ func (t *testTransport) SetConfigForModel(
 	if err != nil {
 		return err
 	}
-	_, err = obj.Call("set", encodedData)
+	_, err = obj.Call("set", emptyMetadata, encodedData)
 	return err
 }
 func (t *testTransport) CheckConfigForModel(
@@ -445,7 +452,7 @@ func (t *testTransport) CheckConfigForModel(
 	if err != nil {
 		return err
 	}
-	_, err = obj.Call("check", encodedData)
+	_, err = obj.Call("check", emptyMetadata, encodedData)
 	return err
 }
 func (t *testTransport) StoreConfigByModelInto(modelName string, encodedData *string) error {
@@ -453,7 +460,7 @@ func (t *testTransport) StoreConfigByModelInto(modelName string, encodedData *st
 	if err != nil {
 		return err
 	}
-	call, err := obj.Call("get", "")
+	call, err := obj.Call("get", emptyMetadata, "")
 	if err != nil {
 		return err
 	}
@@ -464,7 +471,7 @@ func (t *testTransport) StoreStateByModelInto(modelName string, encodedData *str
 	if err != nil {
 		return err
 	}
-	call, err := obj.Call("get", "")
+	call, err := obj.Call("get", emptyMetadata, "")
 	if err != nil {
 		return err
 	}
@@ -503,7 +510,7 @@ func (t *testTransport) getDestinationByModuleName(
 	if err != nil {
 		return "", err
 	}
-	call, err := obj.Call("lookup-rpc-destination-by-module-name", data)
+	call, err := obj.Call("lookup-rpc-destination-by-module-name", emptyMetadata, data)
 	if err != nil {
 		return "", err
 	}
@@ -733,7 +740,7 @@ func testTransportSemantics(t *testing.T, transport transporter) {
 		t.Run("success", func(t *testing.T) {
 			var out string
 
-			call, err := transport.Call("test-v1", "foo", in)
+			call, err := transport.Call("test-v1", "foo", emptyMetadata, in)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -749,7 +756,7 @@ func testTransportSemantics(t *testing.T, transport transporter) {
 		})
 		t.Run("fail", func(t *testing.T) {
 			var out string
-			call, err := transport.Call("test-v1", "fail", in)
+			call, err := transport.Call("test-v1", "fail", emptyMetadata, in)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -760,14 +767,14 @@ func testTransportSemantics(t *testing.T, transport transporter) {
 			}
 		})
 		t.Run("non-existant-module", func(t *testing.T) {
-			_, err := transport.Call("test-v2", "foo", in)
+			_, err := transport.Call("test-v2", "foo", emptyMetadata, in)
 			if err == nil {
 				t.Fatal("expected failure didn't occur")
 			}
 
 		})
 		t.Run("non-existant-rpc", func(t *testing.T) {
-			_, err := transport.Call("test-v1", "bar", in)
+			_, err := transport.Call("test-v1", "bar", emptyMetadata, in)
 			if err == nil {
 				t.Fatal("expected failure didn't occur")
 			}

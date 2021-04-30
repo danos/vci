@@ -62,7 +62,7 @@ type transporter interface {
 	RequestIdentity(id string) error
 	// Call calls an RPC on the transport. All information transmitted
 	// on the transport is RFC7951 encoded strings.
-	Call(moduleName, rpcName, input string) (transportRPCPromise, error)
+	Call(moduleName, rpcName, meta, input string) (transportRPCPromise, error)
 	// Subscribe adds a subscirber for a given notification, the
 	// transport must be able to support multiple subscribers for a
 	// single notification name.

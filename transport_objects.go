@@ -156,7 +156,8 @@ func (o *config) generateSetMethod(object interface{}) error {
 		methodType := method.Type()
 		methodInputType := methodType.In(0)
 
-		ins, errs := o.decodeInput(methodInputType, encodedData)
+		ins := make([]reflect.Value, 0, 1)
+		ins, errs := o.decodeInput(ins, methodInputType, encodedData)
 		if errs != nil {
 			return errs
 		}
@@ -180,7 +181,8 @@ func (o *config) generateCheckMethod(object interface{}) error {
 		methodType := method.Type()
 		methodInputType := methodType.In(0)
 
-		ins, errs := o.decodeInput(methodInputType, encodedData)
+		ins := make([]reflect.Value, 0, 1)
+		ins, errs := o.decodeInput(ins, methodInputType, encodedData)
 		if errs != nil {
 			return errs
 		}
@@ -253,7 +255,7 @@ func (o *rpcObject) generateMethodsFromMap(in map[string]interface{}) {
 		if methodValue.Kind() != reflect.Func {
 			continue
 		}
-		if methodType.NumIn() != 1 {
+		if methodType.NumIn() < 1 || methodType.NumIn() > 2 {
 			continue
 		}
 		if methodType.NumOut() != 2 {
@@ -276,9 +278,9 @@ func (o *rpcObject) generateMethodsFromObject(object interface{}) {
 		//methods must be of the form func(_) (_, _) we don't
 		//care about argument types because they will be
 		//encoded/decode by the wrapper function.
-		if methodType.NumIn() != 1 {
+		if methodType.NumIn() < 1 || methodType.NumIn() > 2 {
 			o.err = errors.New(
-				"All RPCs must have one and only one argument")
+				"All RPCs must have either one or two arguments")
 			return
 		}
 		if methodType.NumOut() != 2 {
@@ -299,23 +301,49 @@ func (o *rpcObject) generateMethodsFromObject(object interface{}) {
 func (o *rpcObject) wrapRPCMethod(
 	moduleName, name string,
 	method reflect.Value,
-) func(string) (string, error) {
-	wrapper := func(encodedData string) (string, error) {
+) func(string, string) (string, error) {
+	wrapper := func(metadata, encodedData string) (string, error) {
 		methodType := method.Type()
-		methodInputType := methodType.In(0)
+		numIn := methodType.NumIn()
+
+		var metaType, methodInputType reflect.Type
+		switch numIn {
+		case 1:
+			methodInputType = methodType.In(0)
+		case 2:
+			metaType = methodType.In(0)
+			methodInputType = methodType.In(1)
+		}
+
 		ok, err := o.validateRPCInput(
 			moduleName, name, encodedData, methodInputType)
 		if !ok {
 			return "", err
 		}
-		var outs []reflect.Value
 
-		ins, errs := o.decodeInput(methodInputType, encodedData)
-		if errs != nil {
-			return "", errs
+		var ins []reflect.Value
+		switch numIn {
+		case 1:
+			var errs error
+			ins = make([]reflect.Value, 0, 1)
+			ins, errs = o.decodeInput(ins, methodInputType, encodedData)
+			if errs != nil {
+				return "", errs
+			}
+		case 2:
+			var errs error
+			ins = make([]reflect.Value, 0, 2)
+			ins, errs = o.decodeInput(ins, metaType, metadata)
+			if errs != nil {
+				return "", errs
+			}
+			ins, errs = o.decodeInput(ins, methodInputType, encodedData)
+			if errs != nil {
+				return "", errs
+			}
 		}
 
-		outs = method.Call(ins)
+		outs := method.Call(ins)
 		val := outs[0]
 		errv := outs[1]
 
@@ -443,6 +471,7 @@ func (o *wrapperObject) setMethod(
 }
 
 func (o *wrapperObject) decodeInput(
+	cur []reflect.Value,
 	typ reflect.Type,
 	input string,
 ) ([]reflect.Value, error) {
@@ -450,7 +479,8 @@ func (o *wrapperObject) decodeInput(
 	if err != nil {
 		return nil, err
 	}
-	return []reflect.Value{reflect.ValueOf(newInput)}, nil
+	cur = append(cur, reflect.ValueOf(newInput))
+	return cur, nil
 }
 
 func (o *wrapperObject) encodeError(err interface{}) error {

@@ -731,7 +731,7 @@ func TestTransportObjectRPCMapSkipsNonFunction(t *testing.T) {
 func TestTransportObjectRPCMapSkipsWrongNumIn(t *testing.T) {
 	rpcMap := make(map[string]interface{})
 	rpcMap["CallMeDirect"] = callMeDirect
-	rpcMap["NotValid"] = func(a, b int) (int, error) {
+	rpcMap["NotValid"] = func(a, b, c int) (int, error) {
 		return 0, nil
 	}
 	rpcs := testGetRPCMethods(t, "", rpcMap)
@@ -858,7 +858,7 @@ func TestTransportObjectRPCIncorrectNumArgs(t *testing.T) {
 		t.Errorf("object should not be valid")
 	}
 	checkErrorContains(t, obj,
-		"All RPCs must have one and only one argument")
+		"All RPCs must have either one or two arguments")
 }
 
 type testRPCIncorrectNumReturn struct {
@@ -909,7 +909,7 @@ func newTestYangdRPC(desiredResult bool) *testYangdRPC {
 }
 
 func (yr *testYangdRPC) Call(
-	moduleName, rpcName, rpcReq string,
+	moduleName, rpcName, meta, rpcReq string,
 ) (transportRPCPromise, error) {
 	yr.validateInputJSON = rpcReq
 
@@ -1016,14 +1016,14 @@ func checkRPCExistsAndIsWrapped(
 	t *testing.T,
 	rpcs map[string]interface{},
 	methodName string,
-) func(string) (string, error) {
+) func(string, string) (string, error) {
 
 	method, exists := rpcs[methodName]
 	if !exists {
 		t.Fatalf("Expected %s method doesn't exist\n", methodName)
 		return nil
 	}
-	fn, ok := method.(func(string) (string, error))
+	fn, ok := method.(func(string, string) (string, error))
 	if !ok {
 		t.Fatalf("%s is not wrapped", methodName)
 		return nil
@@ -1046,11 +1046,11 @@ func checkRPCDoesNotExist(
 func checkMethodCallSucceeds(
 	t *testing.T,
 	methodName string,
-	fn func(string) (string, error),
+	fn func(string, string) (string, error),
 	in string,
 	expOut string,
 ) {
-	out, err := fn(in)
+	out, err := fn(emptyMetadata, in)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1063,11 +1063,11 @@ func checkMethodCallSucceeds(
 func checkMethodCallFails(
 	t *testing.T,
 	methodName string,
-	fn func(string) (string, error),
+	fn func(string, string) (string, error),
 	in string,
 	expErr string,
 ) {
-	_, err := fn(in)
+	_, err := fn(emptyMetadata, in)
 	if err == nil {
 		t.Fatalf("Unexpected success running %s()", methodName)
 		return
