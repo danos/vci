@@ -1,3 +1,18 @@
+vyatta-component-infra (4.12) unstable; urgency=medium
+
+  [ Nicholas Brown ]
+  * dh-systemd is part of debhelper
+
+  [ William Ivory ]
+  * Fix Debian11 build.
+  * Reset ServiceManager connection on close.
+  * Add new VCI methods.
+
+  [ John Southworth ]
+  * Add the ability for a component to optionally request metadata.
+
+ -- Paul Carson <paul.carson@intl.att.com>  Thu, 01 Jul 2021 14:10:46 +0100
+
 vyatta-component-infra (4.11) unstable; urgency=medium
 
   [ Daniel Gollub ]
