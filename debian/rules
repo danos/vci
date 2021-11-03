@@ -9,8 +9,21 @@ GOCOVER=$(if $(shell go doc cmd/cover >/dev/null 2>&1 && echo true),-cover,)
 
 GOBUILDDIR := _build
 
+SYSTEMD_DEV_VER := $(shell dpkg-query -W -f='$${Version}' golang-github-coreos-go-systemd-dev)
+SYSTEMD_DEV_NEW := $(shell dpkg --compare-versions $(SYSTEMD_DEV_VER) ge 18 && echo "1" || echo "0")
+
 %:
 	dh $@ --buildsystem=golang --with=golang --builddirectory=$(GOBUILDDIR)
+
+# This is a temporary fix while we are building both Deb10 and Deb11 from this
+# source. Once we move to Deb11 only, the changes can be made unconditionally
+# in dbus_transport.go.
+override_dh_auto_configure:
+	if [ "$(SYSTEMD_DEV_NEW)" = "1" ]; then \
+		sed -i "s/dbus.DialHandler(vciBusAddress, hdlr, t)/dbus.Dial(vciBusAddress, dbus.WithHandler(hdlr), dbus.WithSignalHandler(t))/g" $(CURDIR)/dbus_transport.go; \
+		sed -i "s/dbus.SessionBusPrivateHandler(hdlr, t)/dbus.SessionBusPrivate(dbus.WithHandler(hdlr), dbus.WithSignalHandler(t))/g" $(CURDIR)/dbus_transport.go; \
+	fi
+	dh_auto_configure
 
 override_dh_auto_build: vet
 	dh_auto_build
